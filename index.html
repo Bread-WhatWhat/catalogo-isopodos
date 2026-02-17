@@ -11,12 +11,11 @@
   
   <style>
     /* =========================================
-       ESTILOS VISUALES (WEB)
+       ESTILOS VISUALES (WEB) - IDÉNTICO A BASE 2.0
        ========================================= */
     :root { --zen-dark: #0d1117; --zen-primary: #2d5a4f; }
     body { background: #0d1117; font-family: 'Lora', serif; color: #f0f6f4; margin: 0; }
 
-    /* Tarjetas Web */
     .card-container { 
         background: #f0f6f4; border-radius: 12px; overflow: hidden; color: #0d1117;
         box-shadow: 0 4px 15px rgba(0,0,0,0.4); height: 100%; display: flex; flex-direction: column; 
@@ -25,7 +24,7 @@
     .card-image img { width: 100%; height: 100%; object-fit: cover; }
 
     /* =========================================
-       ESTILOS DEL PDF (COMPACTO Y AJUSTADO)
+       ESTILOS DEL PDF (MOTOR BASE 2.0)
        ========================================= */
     #pdf-overlay-root {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -33,80 +32,80 @@
       overflow-y: scroll; display: none;
     }
 
-    /* Hoja A4 con GRADIENTE */
+    /* GRADIENTE OPACO: La clave para que no salga negro con backgroundColor: null */
     .pdf-sheet {
       width: 794px; height: 1122px; 
       background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #e0f2fe 100%) !important;
       margin: 20px auto;
-      
-      /* CAMBIO 1: Padding superior/inferior mínimo (10px) para ganar espacio vertical */
-      padding: 10px 35px; 
-      
+      padding: 10px 30px; 
       color: black; position: relative; display: flex; flex-direction: column;
       box-shadow: 0 0 25px rgba(0,0,0,0.5);
     }
 
-    /* Layout Grid 2x3 */
+    /* Portadas de Capítulo (NUEVO: Estilo para separar secciones) */
+    .chapter-cover {
+      flex-grow: 1; display: flex; flex-direction: column; 
+      justify-content: center; align-items: center; text-align: center;
+    }
+
     .pdf-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(2, 1fr);
-      
-      /* CAMBIO 2: Reducir espacio entre filas de 15px a 10px */
+      grid-template-rows: repeat(3, 340px); /* Altura fija Base 2.0 */
       gap: 10px; 
-      
-      flex-grow: 1; 
+      flex-grow: 0; 
       height: auto; 
       margin-top: 5px;
+      justify-content: center;
     }
 
-    /* Tarjeta PDF */
     .pdf-card {
-      border: 1px solid #ddd; border-radius: 6px;
+      border: 1px solid #ddd; border-radius: 5px;
       overflow: hidden; display: flex; flex-direction: column; height: 100%;
       background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); 
     }
 
-    /* Imagen PDF */
     .pdf-card-img {
-      /* CAMBIO 3: Altura ajustada a 215px para asegurar que la fila 2 no se corte */
-      height: 215px; 
+      height: 185px; /* Altura Base 2.0 */
       width: 100%; background: #f0f0f0;
       display: flex; align-items: center; justify-content: center; overflow: hidden;
       border-bottom: 1px solid #eee;
     }
     .pdf-card-img img { width: 100%; height: 100%; object-fit: cover; }
 
-   .pdf-body { 
-      padding: 2px 8px; /* Antes era 6px 8px */
+    .pdf-body { 
+      padding: 5px 6px; 
       flex-grow: 1; 
       display: flex; 
       flex-direction: column; 
     }
 
     .pdf-desc {
-      font-size: 10px; line-height: 1.2; color: #444; 
-      margin: 1px 0 0 0; /* Antes tenía márgenes mayores */
-      flex-grow: 1; 
-      overflow: hidden;
-    }
-      
-      /* Flex grow controlado para que ocupe espacio pero no empuje en exceso */
+      font-size: 9px; line-height: 1.1; color: #444; 
+      margin: 3px 0 2px 0; 
       flex-grow: 1; 
       overflow: hidden;
     }
 
-    /* Footer datos técnicos */
+    /* NUEVO: Precio inyectado en el espacio libre */
+    .pdf-price {
+      text-align: right; 
+      font-size: 11px; 
+      font-weight: bold; 
+      color: #2d5a4f; 
+      margin-bottom: 2px;
+      margin-top: auto; /* Empuja hacia abajo aprovechando flex */
+    }
+
     .pdf-footer {
-      /* CAMBIO 5: margin-top: 0 para eliminar el "espacio fantasma" grande */
-      margin-top: auto; 
-      
+      margin-top: 0; /* Base 2.0 */
       background: #f8fafc; border-top: 1px solid #e2e8f0;
-      padding: 3px 5px; font-size: 9px; font-weight: bold;
+      padding: 2px 4px; font-size: 8px; font-weight: bold;
       display: flex; justify-content: space-between; color: #334155;
     }
 
-    .badge-pdf { padding: 1px 5px; border-radius: 4px; font-size: 8px; font-weight: bold; border: 1px solid #ccc; text-transform: uppercase; }
+    .badge-pdf { padding: 1px 4px; border-radius: 3px; font-size: 7px; font-weight: bold; border: 1px solid #ccc; text-transform: uppercase; }
   </style>
 </head>
 <body>
@@ -114,14 +113,12 @@
   <div id="app">
     <header class="p-8 text-center border-b border-emerald-900" style="background: linear-gradient(135deg, #1a3a35 0%, #2d5a4f 100%);">
       <h1 class="text-5xl text-white font-serif mb-2">Bicheando'pe</h1>
-      <p class="text-emerald-300 text-lg mb-6 italic">Catálogo de Isópodos</p>
+      <p class="text-emerald-300 text-lg mb-6 italic">Catálogo de Colección</p>
       
       <button id="btn-pdf" onclick="generatePDF()" class="px-8 py-3 bg-white text-emerald-900 font-bold rounded-full shadow-lg hover:bg-emerald-50 transition cursor-pointer">
-        GENERAR PDF AHORA
+        GENERAR CATÁLOGO OFICIAL
       </button>
-      <div id="loading-msg" class="mt-4 text-white font-bold hidden">
-        ⚙️ Procesando imágenes y generando PDF...
-      </div>
+      <div id="loading-msg" class="mt-4 text-white font-bold hidden"></div>
     </header>
 
     <main class="max-w-7xl mx-auto p-8">
@@ -130,158 +127,182 @@
   </div>
 
   <div id="pdf-overlay-root">
-    <div style="text-align:center; color:white; padding:20px; position:sticky; top:0;">
-      <h2>Generando... Por favor no cierres esta ventana.</h2>
-    </div>
     <div id="pdf-content-zone"></div>
   </div>
 
   <script src="datos_isopodos.js"></script>
 
   <script>
-    // 1. CARGA DE DATOS
-    let db = [];
-    if (typeof ISOPOD_DB !== 'undefined') {
-      db = ISOPOD_DB;
-    } else {
-      // Datos de prueba
-      for(let i=1; i<=8; i++) {
-        db.push({
-          name: `Isópodo ${i}`, scientific: `Porcellio sp.`, 
-          description: "Prueba de generación de PDF. Eliminando márgenes excesivos para que el footer no salte de página.",
-          difficulty: "Media", temp_min: 22, temp_max: 26, hum_min: 70, hum_max: 80,
-          img: "https://via.placeholder.com/400x300?text=IMG+TEST"
-        });
-      }
-    }
+    // 1. BASE DE DATOS MAESTRA (Con precios y categorías nuevas)
+    const DB_MASTER = [
+      // --- ISÓPODOS ---
+      { id: 1, name: "Panda King Red", scientific: "Cubaris sp.", category: "Isópodos", description: "Variante de coloración rojiza/arcilla. Tímidos y apreciados.", difficulty: "Media", temp_min: 24, temp_max: 28, hum_min: 70, hum_max: 80, price: 30, img: "img/panda_red.jpg" },
+      { id: 2, name: "Panda King Black", scientific: "Cubaris sp.", category: "Isópodos", description: "El clásico isópodo asiático con patrón de oso panda.", difficulty: "Media", temp_min: 24, temp_max: 28, hum_min: 70, hum_max: 80, price: 18, img: "img/panda_black.jpg" },
+      { id: 7, name: "Magic Potion", scientific: "Armadillidium vulgare", category: "Isópodos", description: "Morfología japonesa, cuerpo translúcido y manchas amarillas.", difficulty: "Fácil", temp_min: 18, temp_max: 26, hum_min: 50, hum_max: 60, price: 15, img: "img/magic.jpg" },
+      { id: 10, name: "Glacier", scientific: "Cubaris murina", category: "Isópodos", description: "Morfo blanco (albino) de la Little Sea. Prolíficos.", difficulty: "Fácil", temp_min: 22, temp_max: 28, hum_min: 70, hum_max: 90, price: 20, img: "img/glacier.jpg" },
+      { id: 9, name: "Little Sea", scientific: "Cubaris murina", category: "Isópodos", description: "Cubaris resistente y adaptable. Tono azul grisáceo.", difficulty: "Fácil", temp_min: 22, temp_max: 28, hum_min: 60, hum_max: 80, price: 14, img: "img/little_sea.jpg" },
+      { id: 6, name: "Dairy Cow", scientific: "Porcellio laevis", category: "Isópodos", description: "Grandes, rápidos y voraces. Reproducción explosiva.", difficulty: "Muy Fácil", temp_min: 18, temp_max: 28, hum_min: 40, hum_max: 60, price: 13, img: "img/dairy.jpg" },
+      
+      // Isópodos "Consultar"
+      { id: 3, name: "Amber Bee", scientific: "Cubaris sp.", category: "Isópodos", description: "Pequeños y activos con rayas amarillas y negras.", difficulty: "Fácil", temp_min: 22, temp_max: 26, hum_min: 60, hum_max: 75, price: "Consultar", img: "img/amber.jpg" },
+      { id: 12, name: "Powder Orange", scientific: "Porcellionides pruinosus", category: "Isópodos", description: "Veloces y de textura 'empolvada'.", difficulty: "Muy Fácil", temp_min: 20, temp_max: 28, hum_min: 50, hum_max: 75, price: "Consultar", img: "img/powder_orange.jpg" },
+      { id: 4, name: "Spiky Isopod", scientific: "Cristarmadillidium muricatum", category: "Isópodos", description: "Joya española con espinas dorsales.", difficulty: "Media-Alta", temp_min: 20, temp_max: 25, hum_min: 50, hum_max: 60, price: "Consultar", img: "img/spiky.jpg" },
+      { id: 5, name: "Zebra", scientific: "Armadillidium maculatum", category: "Isópodos", description: "Patrón de rayas blancas y negras.", difficulty: "Fácil", temp_min: 18, temp_max: 26, hum_min: 50, hum_max: 60, price: "Consultar", img: "img/zebra.jpg" },
+      { id: 8, name: "Montenegro Clown", scientific: "Armadillidium klugii", category: "Isópodos", description: "Tres filas de puntos y falda roja.", difficulty: "Media", temp_min: 21, temp_max: 27, hum_min: 40, hum_max: 50, price: "Consultar", img: "img/clown.jpg" },
+      { id: 100, name: "White Shark", scientific: "Cubaris sp.", category: "Isópodos", description: "Patrón tricolor exclusivo: rostro anaranjado.", difficulty: "Media", temp_min: 24, temp_max: 28, hum_min: 70, hum_max: 85, price: "Consultar", img: "img/white_shark.jpg" },
 
-    // 2. RENDER WEB
+      // --- COLÉMBOLOS ---
+      { id: 201, name: "Tropical White", scientific: "Collembola sp.", category: "Colémbolos", description: "Cultivo de colémbolos blancos. Pocas unidades.", difficulty: "Fácil", temp_min: 20, temp_max: 28, hum_min: 80, hum_max: 99, price: 20, img: "img/col_white.jpg" },
+      { id: 202, name: "Orange Springtail", scientific: "Yuukianura aphoruroides", category: "Colémbolos", description: "Naranjas de mayor tamaño. Lentos y vistosos. (15u)", difficulty: "Media", temp_min: 22, temp_max: 26, hum_min: 70, hum_max: 90, price: 100, img: "img/col_orange.jpg" },
+      { id: 203, name: "Yellow Springtail", scientific: "Collembola sp.", category: "Colémbolos", description: "Mini colonia de colémbolos amarillos. Raros.", difficulty: "Media", temp_min: 22, temp_max: 26, hum_min: 70, hum_max: 90, price: 70, img: "img/col_yellow.jpg" }
+    ];
+
+    // 2. RENDER WEB (Visualización simple)
+    let db = DB_MASTER;
+    
     document.getElementById('web-grid').innerHTML = db.map(item => `
       <div class="card-container">
         <div class="card-image"><img src="${item.img}"></div>
         <div class="p-5 flex flex-col flex-grow">
-          <h3 class="font-bold text-lg">${item.name}</h3>
+          <div class="flex justify-between items-start">
+            <h3 class="font-bold text-lg">${item.name}</h3>
+            <span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded">${item.price !== 'Consultar' ? 'S/ '+item.price : 'Consultar'}</span>
+          </div>
+          <p class="text-sm text-gray-600 italic mb-2">${item.category}</p>
           <p class="text-sm">${item.description}</p>
         </div>
       </div>
     `).join('');
 
-    // 3. BASE64
-    const toBase64 = url => fetch(url)
-      .then(response => response.blob())
-      .then(blob => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      }))
-      .catch(() => null); 
+    const toBase64 = url => fetch(url).then(r => r.blob()).then(b => new Promise((res, rej) => {
+        const r = new FileReader(); r.onloadend = () => res(r.result); r.onerror = rej; r.readAsDataURL(b);
+    })).catch(() => null); 
 
-    // 4. GENERADOR PDF
+    // 3. GENERADOR PDF (Lógica de Separación + Config Base 2.0)
     async function generatePDF() {
       const btn = document.getElementById('btn-pdf');
       const msg = document.getElementById('loading-msg');
       const overlay = document.getElementById('pdf-overlay-root');
       const container = document.getElementById('pdf-content-zone');
 
-      btn.disabled = true;
-      msg.classList.remove('hidden');
-      msg.innerText = "🔄 Convirtiendo imágenes (Paso 1/3)...";
+      btn.disabled = true; msg.classList.remove('hidden');
+      msg.innerText = "🔄 Procesando imágenes...";
 
-      const dbWithImages = await Promise.all(db.map(async (item) => {
-        let finalImg = item.img;
-        try {
-          const base64 = await toBase64(item.img);
-          if (base64) finalImg = base64; 
-        } catch (e) {
-          console.warn("No se pudo cargar imagen:", item.name);
-        }
-        return { ...item, finalImg };
-      }));
-
-      msg.innerText = "📄 Maquetando PDF (Paso 2/3)...";
+      // NO tocamos el background del overlay, dejamos que el CSS del PDF mande
       overlay.style.display = 'block';
-      container.innerHTML = '';
-
-      // PORTADA
-      const cover = document.createElement('div');
-      cover.className = 'pdf-sheet';
-      cover.innerHTML = `
-        <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
-          <h1 style="font-size: 80px; color: #2d5a4f;">Bicheando'pe</h1>
-          <hr style="width:100px; height:5px; background:#2d5a4f; margin:30px 0;">
-          <h2 style="font-size: 40px;">Catálogo Oficial</h2>
-          <p>${new Date().toLocaleDateString()}</p>
-        </div>`;
-      container.appendChild(cover);
-
-      // PÁGINAS
-      const itemsPerPage = 6;
-      for (let i = 0; i < dbWithImages.length; i += itemsPerPage) {
-        const chunk = dbWithImages.slice(i, i + itemsPerPage);
-        const page = document.createElement('div');
-        page.className = 'pdf-sheet';
-
-        let cards = chunk.map(item => `
-          <div class="pdf-card">
-            <div class="pdf-card-img">
-              <img src="${item.finalImg}" style="display:block;">
-            </div>
-            <div class="pdf-body">
-              <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                <b style="font-size:12px;">${item.name}</b>
-                <span class="badge-pdf">${item.difficulty || 'MEDIA'}</span>
-              </div>
-              <i style="font-size:10px; color:#2d5a4f; margin-bottom:2px;">${item.scientific}</i>
-              <div class="pdf-desc">${item.description}</div>
-              <div class="pdf-footer">
-                <span>Temp: ${item.temp_min}-${item.temp_max}°C</span>
-                <span>Hum: ${item.hum_min}-${item.hum_max}%</span>
-              </div>
-            </div>
-          </div>
-        `).join('');
-
-        while (chunk.length < 6) {
-             cards += `<div style="border:1px dashed #eee; background: transparent;"></div>`; 
-             chunk.push({}); 
-        }
-
-        page.innerHTML = `
-          <div style="border-bottom:2px solid #2d5a4f; margin-bottom:5px; display:flex; justify-content:space-between;">
-            <b style="color:#2d5a4f;">Catálogo</b>
-            <span style="font-size:12px;">Pág ${Math.floor(i/6)+2}</span>
-          </div>
-          <div class="pdf-grid">${cards}</div>
-        `;
-        container.appendChild(page);
-      }
-
-      msg.innerText = "💾 Descargando PDF (Paso 3/3)...";
-      await new Promise(r => setTimeout(r, 1000));
-
-      const opt = {
-        margin: 0,
-        filename: 'Catalogo_BicheandoPe.pdf',
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { 
-            scale: 2, 
-            useCORS: true, 
-            scrollY: 0,
-            backgroundColor: null 
-        },
-        jsPDF: { unit: 'px', format: [794, 1122], orientation: 'portrait' }
-      };
 
       try {
+        const dbReady = await Promise.all(db.map(async (item) => {
+          let finalImg = item.img;
+          try { const b64 = await toBase64(item.img); if(b64) finalImg = b64; } catch(e){}
+          return { ...item, finalImg };
+        }));
+
+        // Clasificación
+        const isopodos = dbReady.filter(i => i.category === 'Isópodos');
+        const colembolos = dbReady.filter(i => i.category === 'Colémbolos');
+
+        container.innerHTML = '';
+
+        // --- MAQUETACIÓN ---
+        
+        // 1. Portada Principal
+        addCoverPage(container, "Bicheando'pe", "Catálogo Oficial", new Date().toLocaleDateString());
+
+        // 2. Sección Isópodos (con su Portada)
+        if (isopodos.length > 0) {
+          addChapterCover(container, "Isópodos", "Variedad y Genética");
+          addGridPages(container, isopodos, "Isópodos");
+        }
+
+        // 3. Sección Colémbolos (Separada con su Portada)
+        if (colembolos.length > 0) {
+          addChapterCover(container, "Colémbolos", "Especies Variadas");
+          addGridPages(container, colembolos, "Colémbolos");
+        }
+
+        msg.innerText = "💾 Renderizando PDF...";
+        await new Promise(r => setTimeout(r, 1000)); 
+
+        // CONFIGURACIÓN SAGRADA DEL CÓDIGO BASE 2.0
+        // NO cambiar backgroundColor a white. Dejarlo en NULL.
+        const opt = {
+          margin: 0,
+          filename: 'Catalogo_BicheandoPe_Oficial.pdf',
+          image: { type: 'jpeg', quality: 0.95 },
+          html2canvas: { 
+              scale: 2, 
+              useCORS: true, 
+              scrollY: 0,
+              backgroundColor: null // MANTENER ASÍ PARA EVITAR PANTALLA NEGRA
+          },
+          jsPDF: { unit: 'px', format: [794, 1122], orientation: 'portrait' }
+        };
+
         await html2pdf().set(opt).from(container).save();
+
       } catch (err) {
         alert("Error: " + err.message);
       } finally {
         overlay.style.display = 'none';
-        btn.disabled = false;
+        btn.disabled = false; 
         msg.classList.add('hidden');
-        btn.innerText = "GENERAR PDF AHORA";
+        btn.innerText = "GENERAR CATÁLOGO OFICIAL";
+      }
+    }
+
+    // FUNCIONES HELPER
+    function addCoverPage(c, t, s, d) {
+      c.innerHTML += `<div class="pdf-sheet"><div class="chapter-cover">
+        <h1 style="font-size:80px; color:#2d5a4f;">${t}</h1>
+        <hr style="width:100px; height:5px; background:#2d5a4f; margin:30px auto;">
+        <h2 style="font-size:40px;">${s}</h2><p>${d}</p>
+      </div></div>`;
+    }
+
+    function addChapterCover(c, t, s) {
+      c.innerHTML += `<div class="pdf-sheet"><div class="chapter-cover">
+        <h1 style="font-size:60px; color:#1a3a35;">${t}</h1>
+        <p style="font-size:24px; color:#2d5a4f; font-style:italic;">${s}</p>
+      </div></div>`;
+    }
+
+    function addGridPages(container, items, section) {
+      const itemsPerPage = 9; 
+      for (let i = 0; i < items.length; i += itemsPerPage) {
+        const chunk = items.slice(i, i + itemsPerPage);
+        
+        let cards = chunk.map(item => `
+          <div class="pdf-card">
+            <div class="pdf-card-img"><img src="${item.finalImg}" style="display:block;"></div>
+            <div class="pdf-body">
+              <div style="display:flex; justify-content:space-between; margin-bottom:1px;">
+                <b style="font-size:11px;">${item.name}</b>
+                <span class="badge-pdf">${item.difficulty || 'MEDIA'}</span>
+              </div>
+              <i style="font-size:9px; color:#2d5a4f; margin-bottom:1px;">${item.scientific}</i>
+              <div class="pdf-desc">${item.description}</div>
+              
+              <div class="pdf-price">${typeof item.price === 'number' ? 'S/ '+item.price+'.00' : item.price}</div>
+              
+              <div class="pdf-footer">
+                <span>T: ${item.temp_min}-${item.temp_max}°C</span>
+                <span>H: ${item.hum_min}-${item.hum_max}%</span>
+              </div>
+            </div>
+          </div>`).join('');
+
+        while (chunk.length < 9) { cards += `<div style="border:1px dashed #eee; background:transparent;"></div>`; chunk.push({}); }
+
+        container.innerHTML += `
+          <div class="pdf-sheet">
+            <div style="border-bottom:2px solid #2d5a4f; margin-bottom:5px; display:flex; justify-content:space-between; height:20px; align-items:center;">
+              <b style="color:#2d5a4f; font-size:14px;">${section}</b>
+              <span style="font-size:10px;">Pág ${Math.floor(i/9)+1}</span>
+            </div>
+            <div class="pdf-grid">${cards}</div>
+            <div style="margin-top:auto; text-align:center; font-size:9px; color:#999; height:12px;">Bicheando'pe</div>
+          </div>`;
       }
     }
   </script>
