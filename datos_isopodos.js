@@ -89,6 +89,26 @@ const ISOPOD_DB = [
     temp_min: 22, temp_max: 28,
     hum_min: 60, hum_max: 80,
     img: "img/little_sea.jpg"
+  },
+  {
+    id: 10,
+    name: "White Shark",
+    scientific: "Cubaris sp.",
+    description: "Patrón tricolor exclusivo: rostro anaranjado con cuerpo blanco y negro. Especie 'dwarf' activa y excavadora.",
+    difficulty: "Media",
+    temp_min: 24, temp_max: 28,
+    hum_min: 70, hum_max: 85,
+    img: "img/white_shark.jpg"
+  },
+  {
+    id: 11,
+    name: "Glacier",
+    scientific: "Cubaris murina",
+    description: "Morfo completamente blanco (albino) de la Little Sea. Extremadamente prolíficos, resistentes y adaptables.",
+    difficulty: "Fácil",
+    temp_min: 22, temp_max: 28,
+    hum_min: 70, hum_max: 90,
+    img: "img/glacier.jpg"
   }
 ];
 
