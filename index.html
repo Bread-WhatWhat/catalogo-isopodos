@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bicheando'pe - Catálogo Oficial</title>
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* =========================================
+       ESTILOS VISUALES (WEB)
+       ========================================= */
+    :root { --zen-dark: #0d1117; --zen-primary: #2d5a4f; }
+    body { background: #0d1117; font-family: 'Lora', serif; color: #f0f6f4; margin: 0; }
+
+    /* Tarjetas Web */
+    .card-container { 
+        background: #f0f6f4; border-radius: 12px; overflow: hidden; color: #0d1117;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4); height: 100%; display: flex; flex-direction: column; 
+    }
+    .card-image { height: 220px; background: #1a2a26; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .card-image img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* =========================================
+       ESTILOS DEL PDF (COMPACTO Y AJUSTADO)
+       ========================================= */
+    #pdf-overlay-root {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.85); z-index: 99999;
+      overflow-y: scroll; display: none;
+    }
+
+    /* Hoja A4 con GRADIENTE */
+    .pdf-sheet {
+      width: 794px; height: 1122px; 
+      background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 50%, #e0f2fe 100%) !important;
+      margin: 20px auto;
+      
+      /* CAMBIO 1: Padding superior/inferior mínimo (10px) para ganar espacio vertical */
+      padding: 10px 35px; 
+      
+      color: black; position: relative; display: flex; flex-direction: column;
+      box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    }
+
+    /* Layout Grid 2x3 */
+    .pdf-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      
+      /* CAMBIO 2: Reducir espacio entre filas de 15px a 10px */
+      gap: 10px; 
+      
+      flex-grow: 1; 
+      height: auto; 
+      margin-top: 5px;
+    }
+
+    /* Tarjeta PDF */
+    .pdf-card {
+      border: 1px solid #ddd; border-radius: 6px;
+      overflow: hidden; display: flex; flex-direction: column; height: 100%;
+      background: #fff;
+    }
+
+    /* Imagen PDF */
+    .pdf-card-img {
+      /* CAMBIO 3: Altura ajustada a 215px para asegurar que la fila 2 no se corte */
+      height: 215px; 
+      width: 100%; background: #f0f0f0;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+      border-bottom: 1px solid #eee;
+    }
+    .pdf-card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    .pdf-body { 
+      padding: 6px 8px; /* Padding interno reducido */
+      flex-grow: 1; 
+      display: flex; 
+      flex-direction: column; 
+    }
+
+    /* Texto descripción */
+    .pdf-desc {
+      font-size: 10px; line-height: 1.2; color: #444; 
+      
+      /* CAMBIO 4: Márgenes mínimos para pegar el texto */
+      margin: 4px 0 2px 0; 
+      
+      /* Flex grow controlado para que ocupe espacio pero no empuje en exceso */
+      flex-grow: 1; 
+      overflow: hidden;
+    }
+
+    /* Footer datos técnicos */
+    .pdf-footer {
+      /* CAMBIO 5: margin-top: 0 para eliminar el "espacio fantasma" grande */
+      margin-top: auto; 
+      
+      background: #f8fafc; border-top: 1px solid #e2e8f0;
+      padding: 3px 5px; font-size: 9px; font-weight: bold;
+      display: flex; justify-content: space-between; color: #334155;
+    }
+
+    .badge-pdf { padding: 1px 5px; border-radius: 4px; font-size: 8px; font-weight: bold; border: 1px solid #ccc; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+
+  <div id="app">
+    <header class="p-8 text-center border-b border-emerald-900" style="background: linear-gradient(135deg, #1a3a35 0%, #2d5a4f 100%);">
+      <h1 class="text-5xl text-white font-serif mb-2">Bicheando'pe</h1>
+      <p class="text-emerald-300 text-lg mb-6 italic">Catálogo de Isópodos</p>
+      
+      <button id="btn-pdf" onclick="generatePDF()" class="px-8 py-3 bg-white text-emerald-900 font-bold rounded-full shadow-lg hover:bg-emerald-50 transition cursor-pointer">
+        GENERAR PDF AHORA
+      </button>
+      <div id="loading-msg" class="mt-4 text-white font-bold hidden">
+        ⚙️ Procesando imágenes y generando PDF...
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-8">
+      <div id="web-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+    </main>
+  </div>
+
+  <div id="pdf-overlay-root">
+    <div style="text-align:center; color:white; padding:20px; position:sticky; top:0;">
+      <h2>Generando... Por favor no cierres esta ventana.</h2>
+    </div>
+    <div id="pdf-content-zone"></div>
+  </div>
+
+  <script src="datos_isopodos.js"></script>
+
+  <script>
+    // 1. CARGA DE DATOS
+    let db = [];
+    if (typeof ISOPOD_DB !== 'undefined') {
+      db = ISOPOD_DB;
+    } else {
+      // Datos de prueba
+      for(let i=1; i<=8; i++) {
+        db.push({
+          name: `Isópodo ${i}`, scientific: `Porcellio sp.`, 
+          description: "Prueba de generación de PDF. Eliminando márgenes excesivos para que el footer no salte de página.",
+          difficulty: "Media", temp_min: 22, temp_max: 26, hum_min: 70, hum_max: 80,
+          img: "https://via.placeholder.com/400x300?text=IMG+TEST"
+        });
+      }
+    }
+
+    // 2. RENDER WEB
+    document.getElementById('web-grid').innerHTML = db.map(item => `
+      <div class="card-container">
+        <div class="card-image"><img src="${item.img}"></div>
+        <div class="p-5 flex flex-col flex-grow">
+          <h3 class="font-bold text-lg">${item.name}</h3>
+          <p class="text-sm">${item.description}</p>
+        </div>
+      </div>
+    `).join('');
+
+    // 3. BASE64
+    const toBase64 = url => fetch(url)
+      .then(response => response.blob())
+      .then(blob => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      }))
+      .catch(() => null); 
+
+    // 4. GENERADOR PDF
+    async function generatePDF() {
+      const btn = document.getElementById('btn-pdf');
+      const msg = document.getElementById('loading-msg');
+      const overlay = document.getElementById('pdf-overlay-root');
+      const container = document.getElementById('pdf-content-zone');
+
+      btn.disabled = true;
+      msg.classList.remove('hidden');
+      msg.innerText = "🔄 Convirtiendo imágenes (Paso 1/3)...";
+
+      const dbWithImages = await Promise.all(db.map(async (item) => {
+        let finalImg = item.img;
+        try {
+          const base64 = await toBase64(item.img);
+          if (base64) finalImg = base64; 
+        } catch (e) {
+          console.warn("No se pudo cargar imagen:", item.name);
+        }
+        return { ...item, finalImg };
+      }));
+
+      msg.innerText = "📄 Maquetando PDF (Paso 2/3)...";
+      overlay.style.display = 'block';
+      container.innerHTML = '';
+
+      // PORTADA
+      const cover = document.createElement('div');
+      cover.className = 'pdf-sheet';
+      cover.innerHTML = `
+        <div style="height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;">
+          <h1 style="font-size: 80px; color: #2d5a4f;">Bicheando'pe</h1>
+          <hr style="width:100px; height:5px; background:#2d5a4f; margin:30px 0;">
+          <h2 style="font-size: 40px;">Catálogo Oficial</h2>
+          <p>${new Date().toLocaleDateString()}</p>
+        </div>`;
+      container.appendChild(cover);
+
+      // PÁGINAS
+      const itemsPerPage = 6;
+      for (let i = 0; i < dbWithImages.length; i += itemsPerPage) {
+        const chunk = dbWithImages.slice(i, i + itemsPerPage);
+        const page = document.createElement('div');
+        page.className = 'pdf-sheet';
+
+        let cards = chunk.map(item => `
+          <div class="pdf-card">
+            <div class="pdf-card-img">
+              <img src="${item.finalImg}" style="display:block;">
+            </div>
+            <div class="pdf-body">
+              <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                <b style="font-size:12px;">${item.name}</b>
+                <span class="badge-pdf">${item.difficulty || 'MEDIA'}</span>
+              </div>
+              <i style="font-size:10px; color:#2d5a4f; margin-bottom:2px;">${item.scientific}</i>
+              <div class="pdf-desc">${item.description}</div>
+              <div class="pdf-footer">
+                <span>Temp: ${item.temp_min}-${item.temp_max}°C</span>
+                <span>Hum: ${item.hum_min}-${item.hum_max}%</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+        while (chunk.length < 6) {
+             cards += `<div style="border:1px dashed #eee; background: transparent;"></div>`; 
+             chunk.push({}); 
+        }
+
+        page.innerHTML = `
+          <div style="border-bottom:2px solid #2d5a4f; margin-bottom:5px; display:flex; justify-content:space-between;">
+            <b style="color:#2d5a4f;">Catálogo</b>
+            <span style="font-size:12px;">Pág ${Math.floor(i/6)+2}</span>
+          </div>
+          <div class="pdf-grid">${cards}</div>
+        `;
+        container.appendChild(page);
+      }
+
+      msg.innerText = "💾 Descargando PDF (Paso 3/3)...";
+      await new Promise(r => setTimeout(r, 1000));
+
+      const opt = {
+        margin: 0,
+        filename: 'Catalogo_BicheandoPe.pdf',
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { 
+            scale: 2, 
+            useCORS: true, 
+            scrollY: 0,
+            backgroundColor: null 
+        },
+        jsPDF: { unit: 'px', format: [794, 1122], orientation: 'portrait' }
+      };
+
+      try {
+        await html2pdf().set(opt).from(container).save();
+      } catch (err) {
+        alert("Error: " + err.message);
+      } finally {
+        overlay.style.display = 'none';
+        btn.disabled = false;
+        msg.classList.add('hidden');
+        btn.innerText = "GENERAR PDF AHORA";
+      }
+    }
+  </script>
+</body>
+</html>
