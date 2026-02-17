@@ -109,6 +109,16 @@ const ISOPOD_DB = [
     temp_min: 22, temp_max: 28,
     hum_min: 70, hum_max: 90,
     img: "img/glacier.jpg"
+  },
+  {
+    id: 12,
+    name: "Powder Orange",
+    scientific: "Porcellionides pruinosus",
+    description: "Veloces, voraces y muy prolíficos. Su cuerpo tiene una textura 'empolvada' única. Ideales como equipo de limpieza.",
+    difficulty: "Muy Fácil",
+    temp_min: 20, temp_max: 28,
+    hum_min: 50, hum_max: 75,
+    img: "img/powder_orange.jpg"
   }
 ];
 
